@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <body>
+  	<h1>警戒システム</h1>
+  	<p>レーダー係の視界にハンマーを持ったプレイヤーが入るとこのタブのタイトルを「警戒」に変え、警告音を発する。</p>
+  	<h2>情報</h2>
+    <div id="status"></div>
+    <script type="text/javascript">
+var workerSetTimeout = new (function(){
+	var workerCode = (function(){
+		function onMessage(e){
+			var id = e.data[0];
+			var msec = e.data[1];
+			setTimeout(postMessage, msec, id);
+		}
+		self.addEventListener("message", onMessage);
+	}).toString().match(/function\s*\(\)\s*{([\s\S]*)}/)[1];
+	var blob = new Blob([workerCode], {"type": "text/javascript"});
+	var url = URL.createObjectURL(blob);
+	var worker = new Worker(url);
+
+	var callbacks = [];
+	var nextID = 1;
+	this.setTimeout = function(f, delay, arg){
+		if(!f) return;
+		var id = nextID;
+		nextID++;
+		callbacks[id] = [f, arg];
+		worker.postMessage([id, delay]);
+		return id;
+	};
+	this.clearTimeout = function(id){
+		if(id) delete callbacks[id];
+	}
+	worker.addEventListener("message", function(message){
+		var id = message.data;
+		if(callbacks[id]){
+			callbacks[id][0](callbacks[id][1]);
+			delete callbacks[id];
+		}
+	});
+})();
+
+document.title = "";
+
+var statusDiv = document.getElementById("status");
+var GAS_SERVER = "https://script.google.com/macros/s/AKfycbzEJzcdWwnr70KKyxcTD5YRTgpvkl71yb-I3E37PE478cwofP1s/exec";
+var updateTimeoutID = 0;
+function sendUpdateRequest() {
+	updateTimeoutID = workerSetTimeout.setTimeout(sendUpdateRequest, 1000);
+	var script = document.createElement("script");
+	script.src = GAS_SERVER + "?ask_for_hammer_status=1&callback=callback";
+	document.body.appendChild(script);
+	script.remove();
+}
+var direction = [3, 4, 5, 6, 7, 8, 9, ]
+function callback(data) {
+	if(data && typeof(data[1]) == "number"){
+		if(data[1] < Date.now() - 5000){
+			statusDiv.innerText = "レーダーが停止中";
+			document.title = "停止中";
+		}else{
+			var radarData;
+			try{
+				radarData = JSON.parse(data[1]);
+				var str = "";
+				if(radarData.hammers[0]){
+					str += "- ハンマーを持ったプレイヤーが存在：";
+					for(var p of radarData.hammers){
+						s += p[0] + "（" + p[1] + "）、　";
+					}
+					str += "\n";
+					document.title = "警戒";
+				}else{
+					str += "- 異常なし\n";
+					document.title = "異常なし";
+				}
+				str += "- 付近にいるプレイヤーと方角および距離\n";
+				for(var p of radarData.all){
+					var direction = Math.atan2(p[2], p[1]) / Math.PI * 6 + 3;
+					direction = Math.round(direction + 12) % 12;
+					var distance = Math.round(Math.sqrt(p[1]**2 + p[2]**2));
+					str += p[0] + "　方角：" + direction + "　距離：" + distance + "グリッド";
+				}
+				statusDiv.innerText = str;
+			}catch(e){
+				statusDiv.innerText = "レーダーにエラーが発生";
+				document.title = "エラー";
+				console.log(e);
+			}
+		}
+	}
+	console.log("updated");
+}
+
+updateTimeoutID = workerSetTimeout.setTimeout(sendUpdateRequest, 1000);
+
+    </script>
+  </body>
+</html>
+
+
