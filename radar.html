@@ -56,7 +56,8 @@ function sendUpdateRequest() {
 var direction = [3, 4, 5, 6, 7, 8, 9, ]
 function callback(data) {
 	if(data && typeof(data[1]) == "number"){
-		if(data[1] < Date.now() - 5000){
+		if(typeof(data[1]) != "number" || data[1] < Date.now() - 5000){
+			console.log("delay", Date.now() - data[1]);
 			statusDiv.innerText = "レーダーが停止中";
 			document.title = "停止中";
 		}else{
