@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <body>
-  	<h1>警戒システム</h1>
+  	<h1>レーダーシステム</h1>
   	<p>レーダー係の視界にハンマーを持ったプレイヤーが入るとこのタブのタイトルを「警戒」に変え、警告音を発する。</p>
   	<h2>情報</h2>
     <div id="status"></div>
@@ -44,7 +44,7 @@ var workerSetTimeout = new (function(){
 document.title = "";
 
 var statusDiv = document.getElementById("status");
-var GAS_SERVER = "https://script.google.com/macros/s/AKfycbzEJzcdWwnr70KKyxcTD5YRTgpvkl71yb-I3E37PE478cwofP1s/exec";
+var GAS_SERVER = "https://script.google.com/macros/s/AKfycbzXYoHcf566vjyfwwP2dJapvatCNd0L3ILLFN72lp1I/dev";
 var updateTimeoutID = 0;
 function sendUpdateRequest() {
 	updateTimeoutID = workerSetTimeout.setTimeout(sendUpdateRequest, 1000);
@@ -53,35 +53,38 @@ function sendUpdateRequest() {
 	document.body.appendChild(script);
 	script.remove();
 }
-var direction = [3, 4, 5, 6, 7, 8, 9, ]
+
+var beepSound = new Audio("data:audio/wav;base64," + "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");
+
+
 function callback(data) {
 	if(data && typeof(data[1]) == "number"){
-		if(typeof(data[1]) != "number" || data[1] < Date.now() - 5000){
-			console.log("delay", Date.now() - data[1]);
+		if(data[2] > 5000){
 			statusDiv.innerText = "レーダーが停止中";
 			document.title = "停止中";
 		}else{
 			var radarData;
 			try{
-				radarData = JSON.parse(data[1]);
+				radarData = JSON.parse(data[0]);
 				var str = "";
 				if(radarData.hammers[0]){
-					str += "- ハンマーを持ったプレイヤーが存在：";
+					str += "- ハンマーを持ったプレイヤーが存在↓\n";
 					for(var p of radarData.hammers){
-						s += p[0] + "（" + p[1] + "）、　";
+						str += p[0] + "（" + p[1] + "）\n";
 					}
 					str += "\n";
 					document.title = "警戒";
+					beepSound.play();
 				}else{
 					str += "- 異常なし\n";
 					document.title = "異常なし";
 				}
-				str += "- 付近にいるプレイヤーと方角および距離\n";
+				str += "- 付近にいるプレイヤーと方角および距離↓\n";
 				for(var p of radarData.all){
 					var direction = Math.atan2(p[2], p[1]) / Math.PI * 6 + 3;
 					direction = Math.round(direction + 12) % 12;
-					var distance = Math.round(Math.sqrt(p[1]**2 + p[2]**2));
-					str += p[0] + "　方角：" + direction + "　距離：" + distance + "グリッド";
+					var distance = Math.round(Math.sqrt(p[1]**2 + p[2]**2) / 100);
+					str += p[0] + "　方角：" + direction + "時　距離：" + distance + "グリッド\n";
 				}
 				statusDiv.innerText = str;
 			}catch(e){
@@ -91,7 +94,6 @@ function callback(data) {
 			}
 		}
 	}
-	console.log("updated");
 }
 
 updateTimeoutID = workerSetTimeout.setTimeout(sendUpdateRequest, 1000);
